@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAOLEX Food Law Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --font-sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Liberation Sans",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+
+  --border-radius-md:10px;
+  --border-radius-lg:14px;
+
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f6f8fb;
+  --color-background-info:#e8f2ff;
+  --color-background-success:#eaf3de;
+
+  --color-text-primary:#111827;
+  --color-text-secondary:#4b5563;
+  --color-text-tertiary:#6b7280;
+  --color-text-info:#185fa5;
+  --color-text-success:#3b6d11;
+
+  --color-border-tertiary:rgba(17,24,39,.14);
+  --color-border-info:rgba(55,138,221,.45);
+  --color-border-success:rgba(99,153,34,.45);
+
+  --focus-ring:0 0 0 3px rgba(55,138,221,.25);
+
+  --chart-grid:rgba(17,24,39,.08);
+  --chart-tick:#4b5563;
+}
+
+[data-theme="dark"]{
+  --color-background-primary:#1a1d24;
+  --color-background-secondary:#22262f;
+  --color-background-info:#1b2e44;
+  --color-background-success:#203420;
+
+  --color-text-primary:#e8eaed;
+  --color-text-secondary:#aab0bb;
+  --color-text-tertiary:#7d8492;
+  --color-text-info:#6cb1f5;
+  --color-text-success:#8fc15a;
+
+  --color-border-tertiary:rgba(255,255,255,.10);
+  --color-border-info:rgba(108,177,245,.35);
+  --color-border-success:rgba(143,193,90,.35);
+
+  --focus-ring:0 0 0 3px rgba(108,177,245,.3);
+
+  --chart-grid:rgba(255,255,255,.08);
+  --chart-tick:#aab0bb;
+}
+
+body{
+  font-family:var(--font-sans);
+  color:var(--color-text-primary);
+  background:linear-gradient(180deg,#ffffff 0%,#f5f7fb 100%);
+  line-height:1.4;
+  transition:background .2s,color .2s;
+}
+
+[data-theme="dark"] body{
+  background:linear-gradient(180deg,#15171c 0%,#1a1d24 100%);
+}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.dashboard{
+  max-width:1100px;
+  margin:0 auto;
+  padding:18px 16px 28px;
+}
+.dashboard-head{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem}
+.dashboard-title{font-size:16px;font-weight:600;color:var(--color-text-primary)}
+.dashboard-subtitle{font-size:12px;color:var(--color-text-secondary)}
+
+.tabs{display:flex;gap:8px;padding:0 0 1rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);transition:background .15s,border-color .15s,color .15s,transform .08s;user-select:none}
+.tab:hover{border-color:rgba(17,24,39,.22);background:rgba(246,248,251,.7)}
+.tab:active{transform:translateY(1px)}
+.tab:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.tab.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.panel{display:none}.panel.active{display:block}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:14px;text-align:center}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.chart-wrap{position:relative;width:100%;margin-bottom:1.5rem;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;overflow:hidden}
+.chart-wrap canvas{display:block;width:100% !important;height:100% !important}
+.section-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;font-size:12px;color:var(--color-text-secondary)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.split-info{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.split-card{text-align:center;padding:10px;border-radius:var(--border-radius-md);background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary)}
+.split-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.split-num{font-size:18px;font-weight:500}
+.train-color{color:#378add}
+.test-color{color:#639922}
+.bar-h{display:flex;height:20px;border-radius:4px;overflow:hidden;margin-bottom:1rem}
+.bar-train{background:#378add;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:500}
+.bar-test{background:#639922;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:500}
+.table-wrap{overflow-x:auto;margin-bottom:1rem}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+thead th{background:rgba(246,248,251,.9)}
+th{font-weight:600;text-align:left;padding:9px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:12px}
+td{padding:9px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tbody tr:nth-child(even) td{background:rgba(246,248,251,.45)}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.badge-train{background:#e6f1fb;color:#185fa5}
+.badge-test{background:#eaf3de;color:#3b6d11}
+.badge-correct{background:#eaf3de;color:#3b6d11}
+.badge-wrong{background:#fcebeb;color:#a32d2d}
+.ai-box{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;background:var(--color-background-primary);min-height:80px;margin-bottom:1rem}
+.ai-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.ai-result{font-size:14px;color:var(--color-text-primary);line-height:1.6;white-space:pre-wrap}
+.ai-result.loading{color:var(--color-text-tertiary);font-style:italic}
+.prompt-row{display:flex;gap:8px;margin-bottom:1rem}
+.prompt-row input{flex:1;padding:8px 12px;font-size:13px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.prompt-row input:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.btn-primary{padding:8px 14px;font-size:13px;cursor:pointer;border-radius:var(--border-radius-md);background:var(--color-background-info);color:var(--color-text-info);border:0.5px solid var(--color-border-info);transition:transform .08s,filter .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{filter:saturate(1.05)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.prompt-row button{flex:0 0 auto}
+.prompt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.chip{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.chip:hover{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.mode-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.mode-btn{padding:5px 12px;font-size:12px;cursor:pointer;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-secondary)}
+.mode-btn:hover{background:rgba(246,248,251,.7)}
+.mode-btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.mode-btn.active{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success)}
+.batch-inputs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.batch-inputs input{padding:7px 10px;font-size:12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.batch-inputs input:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.acc-bar-wrap{background:var(--color-background-secondary);border-radius:var(--border-radius-md);height:16px;overflow:hidden;margin-top:4px}
+.acc-bar{height:100%;background:#378add;border-radius:var(--border-radius-md);transition:width 1s ease}
+
+@media (max-width:520px){
+  .tabs{gap:6px}
+  .tab{padding:7px 10px;font-size:12px}
+  .metric-value{font-size:20px}
+  .chart-wrap{padding:8px 10px}
+}
+
+.theme-toggle{
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  font-size:12px;
+  cursor:pointer;
+  border-radius:var(--border-radius-md);
+  border:0.5px solid var(--color-border-tertiary);
+  background:var(--color-background-secondary);
+  color:var(--color-text-secondary);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.theme-toggle:hover{border-color:rgba(17,24,39,.22)}
+.theme-toggle:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+[data-theme="dark"] .badge-train{background:#19324d;color:#6cb1f5}
+[data-theme="dark"] .badge-test{background:#1f3320;color:#8fc15a}
+[data-theme="dark"] .badge-correct{background:#1f3320;color:#8fc15a}
+[data-theme="dark"] .badge-wrong{background:#3a1f1f;color:#e08080}
+[data-theme="dark"] .spinner{border:3px solid #3a3f4a;border-top:3px solid #6cb1f5}
+[data-theme="dark"] .chart-container{background:var(--color-background-primary);box-shadow:0 4px 20px rgba(0,0,0,.35)}
+[data-theme="dark"] thead th{background:rgba(34,38,47,.9)}
+[data-theme="dark"] tbody tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only">Dashboard analisis dataset FAOLEX Food Law — distribusi, train/test split, dan AI query</h2>
+
+<div class="dashboard">
+<div class="dashboard-head">
+  <i class="ti ti-database" style="font-size:20px;color:#378add" aria-hidden="true"></i>
+  <div>
+    <div class="dashboard-title">FAOLEX Food Law Dashboard</div>
+    <div class="dashboard-subtitle">40.535 dokumen regulasi pangan internasional</div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><i class="ti ti-moon" id="themeIcon" aria-hidden="true"></i> <span id="themeLabel">Mode Gelap</span></button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(event,'overview')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Overview</button>
+  <button class="tab" onclick="switchTab(event,'split')"><i class="ti ti-split" aria-hidden="true"></i> Train / Test Split</button>
+  <button class="tab" onclick="switchTab(event,'model')"><i class="ti ti-cpu" aria-hidden="true"></i> Model & Prediksi</button>
+  <button class="tab" onclick="switchTab(event,'ai')"><i class="ti ti-sparkles" aria-hidden="true"></i> AI Query</button>
+</div>
+
+<div id="panel-overview" class="panel active">
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-label">Total Dokumen</div><div class="metric-value">40,535</div><div class="metric-sub">FAOLEX records</div></div>
+    <div class="metric"><div class="metric-label">Negara / Wilayah</div><div class="metric-value">195</div><div class="metric-sub">unik</div></div>
+    <div class="metric"><div class="metric-label">Jenis Teks</div><div class="metric-value">8</div><div class="metric-sub">kategori</div></div>
+    <div class="metric"><div class="metric-label">Rentang Tahun</div><div class="metric-value">1900–2024</div><div class="metric-sub">tanggal text</div></div>
+    <div class="metric"><div class="metric-label">Bahasa</div><div class="metric-value">32</div><div class="metric-sub">bahasa dokumen</div></div>
+  </div>
+
+  <div class="section-title">Distribusi jenis teks</div>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#378add"></span>Regulation 45%</span>
+    <span><span class="legend-dot" style="background:#639922"></span>Legislation 30%</span>
+    <span><span class="legend-dot" style="background:#ba7517"></span>Policy 10%</span>
+    <span><span class="legend-dot" style="background:#993556"></span>Guidelines 8%</span>
+    <span><span class="legend-dot" style="background:#888780"></span>Lainnya 7%</span>
+  </div>
+  <div class="chart-wrap" style="height:220px"><canvas id="chartType" role="img" aria-label="Donut chart distribusi jenis teks regulasi">Regulation 45%, Legislation 30%, Policy 10%, Guidelines 8%, Other 7%</canvas></div>
+
+  <div class="section-title">Top 10 negara terbanyak dokumen</div>
+  <div class="chart-wrap" style="height:360px"><canvas id="chartCountry" role="img" aria-label="Bar chart negara terbanyak">India, USA, EU, China, Brazil, Germany, France, Australia, Canada, UK teratas</canvas></div>
+</div>
+
+<div id="panel-split" class="panel">
+  <div class="section-title">Pembagian dataset (random_state=42)</div>
+  <div class="split-info">
+    <div class="split-card">
+      <div class="split-label">Data Train (80%)</div>
+      <div class="split-num train-color">32,428</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)">baris data latih</div>
+    </div>
+    <div class="split-card">
+      <div class="split-label">Data Test (20%)</div>
+      <div class="split-num test-color">8,107</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)">baris data uji</div>
+    </div>
+  </div>
+  <div class="bar-h">
+    <div class="bar-train" style="width:80%">Train 80%</div>
+    <div class="bar-test" style="width:20%">Test 20%</div>
+  </div>
+
+  <div class="section-title" style="margin-bottom:6px">Parameter split</div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-primary);margin-bottom:1rem;line-height:1.8">
+    <span style="color:#639922">from</span> sklearn.model_selection <span style="color:#639922">import</span> train_test_split<br>
+    X_train, X_test, y_train, y_test = train_test_split(<br>
+    &nbsp;&nbsp;X, y,<br>
+    &nbsp;&nbsp;<span style="color:#ba7517">test_size</span>=<span style="color:#378add">0.20</span>,<br>
+    &nbsp;&nbsp;<span style="color:#ba7517">random_state</span>=<span style="color:#378add">42</span>,<br>
+    &nbsp;&nbsp;<span style="color:#ba7517">stratify</span>=y<br>
+    )
+  </div>
+
+  <div class="section-title">Preview baris data (sampel acak)</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Record ID</th><th>Country</th><th>Type</th><th>Year</th><th>Split</th></tr></thead>
+      <tbody id="previewTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="panel-model" class="panel">
+  <div class="section-title">Model: Naive Bayes (TF-IDF + Multinomial NB)</div>
+  <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:1rem">Target klasifikasi: <strong>Type of text</strong> (Regulation, Legislation, Policy, dll)</div>
+
+  <div class="metric-grid" style="margin-bottom:1rem">
+    <div class="metric"><div class="metric-label">Akurasi Train</div><div class="metric-value" id="accTrain">83.2%</div></div>
+    <div class="metric"><div class="metric-label">Akurasi Test</div><div class="metric-value" id="accTest">78.5%</div></div>
+    <div class="metric"><div class="metric-label">F1-Score</div><div class="metric-value">0.76</div></div>
+    <div class="metric"><div class="metric-label">Features</div><div class="metric-value">5,000</div><div class="metric-sub">TF-IDF top vocab</div></div>
+  </div>
+
+  <div style="margin-bottom:1.5rem">
+    <div class="section-title">Akurasi per kelas</div>
+    <div id="classAccBars"></div>
+  </div>
+
+  <div class="section-title">Confusion matrix (ringkasan)</div>
+  <div class="chart-wrap" style="height:280px"><canvas id="chartCM" role="img" aria-label="Bar chart confusion matrix per kelas">Precision dan recall per kelas teks</canvas></div>
+</div>
+
+<div id="panel-ai" class="panel">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+    <i class="ti ti-sparkles" style="font-size:18px;color:#ba7517" aria-hidden="true"></i>
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">AI Query </div>
+  </div>
+
+  <div class="mode-row">
+    <div style="font-size:12px;color:var(--color-text-secondary);align-self:center">Mode:</div>
+    <button class="mode-btn active" id="btnSingle" onclick="setMode('single')">Single query</button>
+    <button class="mode-btn" id="btnBatch" onclick="setMode('batch')">Batch query</button>
+  </div>
+
+  <div id="singleMode">
+    <div class="section-title">Tanya tentang dataset FAOLEX</div>
+    <div class="prompt-chips">
+      <span class="chip" onclick="setPrompt(this.textContent)">Berikan insight AI terhadap dataset</span>
+      <span class="chip" onclick="setPrompt(this.textContent)">Apa pola utama dalam dataset regulasi pangan?</span>
+      <span class="chip" onclick="setPrompt(this.textContent)">Apa faktor yang mempengaruhi peningkatan dokumen pangan?</span>
+      <span class="chip" onclick="setPrompt(this.textContent)">Topik apa yang sering muncul dalam regulasi pangan?</span>
+      <span class="chip" onclick="setPrompt(this.textContent)">Analisis hubungan antara pertumbuhan dokumen dan isu global pangan?</span>
+    </div>
+    <div class="prompt-row">
+      <input id="singleInput" type="text" placeholder="Tulis pertanyaan tentang dataset FAOLEX Food..." />
+      <button class="btn-primary" id="btnSingleSend" onclick="runSingle()"><i class="ti ti-send" aria-hidden="true"></i> Kirim</button>
+    </div>
+    <div class="ai-label">Respons AI</div>
+    <div class="ai-box"><div class="ai-result" id="singleResult">Masukkan pertanyaan dan klik Kirim untuk mulai...</div></div>
+    <div class="chart-container" id="aiChartWrap" style="display:none">
+
+    <canvas id="aiChart"></canvas>
+
+    </div>
+  
+  
+  </div>
+
+  <div id="batchMode" style="display:none">
+    <div class="section-title">Batch query (beberapa pertanyaan sekaligus)</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Masukkan hingga 3 pertanyaan. Semua akan dijawab sekaligus oleh AI.</div>
+    <div class="batch-inputs">
+      <input id="bq1" type="text" placeholder="Pertanyaan 1..." />
+      <input id="bq2" type="text" placeholder="Pertanyaan 2..." />
+      <input id="bq3" type="text" placeholder="Pertanyaan 3..." />
+    </div>
+    <button class="btn-primary" id="btnBatchSend" style="margin-bottom:1rem" onclick="runBatch()"><i class="ti ti-stack" aria-hidden="true"></i> Proses Batch</button>
+    <div id="batchResults"></div>
+    <div style="margin-top:12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary)">
+      <i class="ti ti-info-circle" aria-hidden="true"></i> Batch query memproses setiap pertanyaan secara berurutan dan mengumpulkan semua hasil. Single query lebih cepat untuk satu pertanyaan; batch cocok untuk analisis multi-aspek sekaligus.
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========================= -->
+<!-- CHART JS -->
+<!-- ========================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+.chart-container{
+
+    width:100%;
+    height:420px;
+
+    margin-top:20px;
+
+    background:white;
+
+    border-radius:16px;
+
+    padding:20px;
+
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+}
+
+#aiChart{
+
+    width:100% !important;
+    height:100% !important;
+}
+
+.spinner{
+
+    width:18px;
+    height:18px;
+
+    border:3px solid #ddd;
+    border-top:3px solid #378add;
+
+    border-radius:50%;
+
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+
+    100%{
+        transform:rotate(360deg);
+    }
+}
+
+</style>
+
+<script>
+
+let aiChart = null;
+
+const $ = (sel) => document.querySelector(sel);
+
+// =====================================================
+// THEME
+// =====================================================
+
+function getTickColor(){
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? '#aab0bb' : '#444';
+}
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if(icon) icon.className = theme === 'dark' ? 'ti ti-sun' : 'ti ti-moon';
+  if(label) label.textContent = theme === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+}
+
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  refreshChartsForTheme();
+}
+
+function refreshChartsForTheme(){
+  if(typeof Chart === 'undefined') return;
+  Chart.helpers.each(Chart.instances, (instance) => {
+    instance.options.scales = instance.options.scales || {};
+    if(instance.options.scales.x && instance.options.scales.x.ticks) instance.options.scales.x.ticks.color = getTickColor();
+    if(instance.options.scales.y && instance.options.scales.y.ticks) instance.options.scales.y.ticks.color = getTickColor();
+    instance.update();
+  });
+}
+
+applyTheme('dark');
+
+
+// =====================================================
+// TAB SWITCH
+// =====================================================
+
+function switchTab(e,name){
+
+    document.querySelectorAll('.tab').forEach(t=>{
+
+        t.classList.remove('active');
+
+    });
+
+    document.querySelectorAll('.panel').forEach(p=>{
+
+        p.classList.remove('active');
+
+    });
+
+    const btn = e?.target?.closest?.('.tab');
+
+    if(btn){
+
+        btn.classList.add('active');
+    }
+
+    document
+    .getElementById('panel-' + name)
+    ?.classList.add('active');
+}
+
+
+// =====================================================
+// MODE
+// =====================================================
+
+let aiMode = 'single';
+
+function setMode(m){
+
+    aiMode = m;
+
+    document
+    .getElementById('btnSingle')
+    .classList.toggle('active',m==='single');
+
+    document
+    .getElementById('btnBatch')
+    .classList.toggle('active',m==='batch');
+
+    document
+    .getElementById('singleMode')
+    .style.display = m==='single'
+    ? 'block'
+    : 'none';
+
+    document
+    .getElementById('batchMode')
+    .style.display = m==='batch'
+    ? 'block'
+    : 'none';
+}
+
+
+// =====================================================
+// SET PROMPT
+// =====================================================
+
+function setPrompt(txt){
+
+    document.getElementById('singleInput').value = txt;
+}
+
+  // =====================================================
+  // OUTPUT FORMAT
+  // =====================================================
+
+  function stripMarkdown(text){
+
+    return String(text)
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/\r\n/g, '\n')
+    .trim();
+  }
+
+
+// =====================================================
+// CALL AI API
+// =====================================================
+
+async function callAI(prompt){
+  // Try Flask-style endpoint first
+  try{
+    const res = await fetch('/predict',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: prompt })
+    });
+
+    if(res.ok){
+      const data = await res.json().catch(()=>null);
+      if(!data) return { error: 'Empty response from /predict' };
+      if(data.error) return { error: data.error };
+      return data; // expected { prediction, chart }
+    }
+
+    // If /predict returns 404, fall through to try /api/ai
+    if(res.status !== 404){
+      const err = await res.json().catch(()=>({ error: res.statusText }));
+      return { error: err?.error || `HTTP ${res.status}` };
+    }
+  }catch(e){
+    // network error or no Flask server; we'll try the Node endpoint below
+    // console.debug('predict fetch failed', e);
+  }
+
+  // Fallback: Node server at `/api/ai` (expects { prompt, system, apiKey })
+  try{
+    const payload = { prompt, system: '', apiKey: '' };
+    const r2 = await fetch('/api/ai',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if(!r2.ok){
+      const err = await r2.json().catch(()=>({ error: r2.statusText }));
+      return { error: err?.error || `HTTP ${r2.status}` };
+    }
+
+    const d2 = await r2.json().catch(()=>null);
+    if(!d2) return { error: 'Empty response from /api/ai' };
+
+    // Map Node response ({ text }) to expected shape
+    return { prediction: d2.text || '', chart: null };
+  }catch(e){
+    return { error: e.message };
+  }
+}
+
+
+// =====================================================
+// SINGLE QUERY
+// =====================================================
+
+async function runSingle(){
+
+    const q = document
+    .getElementById('singleInput')
+    .value
+    .trim();
+
+    if(!q) return;
+
+    const el =
+    document.getElementById('singleResult');
+
+    const btn = document.getElementById('btnSingleSend');
+    if(btn) btn.disabled = true;
+
+    el.innerHTML = `
+
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        color:#378add;
+    ">
+
+        <div class="spinner"></div>
+
+        AI sedang menganalisis dataset...
+
+    </div>
+    `;
+
+    try{
+
+        // =========================
+        // CALL AI
+        // =========================
+
+        const result = await callAI(q);
+
+        if(result.error){
+
+          el.innerText = "Error: " + result.error;
+
+          clearAIChart();
+
+          return;
+        }
+
+        el.innerText = stripMarkdown(result.prediction || '');
+
+        if(result.chart){
+
+          renderAIChart(result.chart);
+
+        }else{
+
+          clearAIChart();
+        }
+
+    }catch(error){
+
+        el.innerText =
+        "Error: " + error.message;
+
+    }finally{
+
+        if(btn) btn.disabled = false;
+    }
+}
+
+
+// =====================================================
+// BATCH QUERY
+// =====================================================
+
+async function runBatch(){
+
+    const qs = [
+
+        document.getElementById('bq1').value.trim(),
+
+        document.getElementById('bq2').value.trim(),
+
+        document.getElementById('bq3').value.trim()
+
+    ].filter(Boolean);
+
+    if(!qs.length) return;
+
+    const container =
+    document.getElementById('batchResults');
+
+    const btn = document.getElementById('btnBatchSend');
+    if(btn) btn.disabled = true;
+
+    container.innerHTML = '';
+
+    try{
+
+        for(let i=0;i<qs.length;i++){
+
+            const wrap =
+            document.createElement('div');
+
+            wrap.style.marginBottom='1rem';
+
+            wrap.innerHTML = `
+
+            <div class="ai-label">
+
+                Pertanyaan ${i+1}
+
+            </div>
+
+            <div class="ai-box">
+
+                <div class="ai-result">
+
+                    Loading...
+
+                </div>
+
+            </div>
+            `;
+
+            container.appendChild(wrap);
+
+            try{
+
+                const ans = await callAI(qs[i]);
+
+                wrap
+                .querySelector('.ai-result')
+                .innerText = ans?.error
+                ? ('Error: ' + ans.error)
+                : stripMarkdown(ans?.prediction || '');
+
+            }catch(e){
+
+                wrap
+                .querySelector('.ai-result')
+                .innerText = 'Error: ' + e.message;
+            }
+        }
+
+    }finally{
+
+        if(btn) btn.disabled = false;
+    }
+}
+
+
+// =====================================================
+// AI CHART RENDER
+// =====================================================
+
+function clearAIChart(){
+
+  const wrap = document.getElementById('aiChartWrap');
+
+  if(wrap){
+
+    wrap.style.display = 'none';
+  }
+
+  if(aiChart){
+
+    aiChart.destroy();
+
+    aiChart = null;
+  }
+}
+
+function renderAIChart(chart){
+
+  const ctx = document.getElementById('aiChart');
+
+  const wrap = document.getElementById('aiChartWrap');
+
+  if(!ctx || !chart?.labels?.length){
+
+    clearAIChart();
+
+    return;
+  }
+
+  if(wrap){
+
+    wrap.style.display = 'block';
+  }
+
+  if(aiChart){
+
+    aiChart.destroy();
+  }
+
+  const palette = [
+    '#378add',
+    '#639922',
+    '#ba7517',
+    '#993556',
+    '#4d6784',
+    '#7d5ba6',
+    '#2f9c95',
+    '#c25420',
+    '#7a7f2b',
+    '#2f4f90'
+  ];
+
+  const dataset = {
+    label: chart.label || 'Jumlah',
+    data: chart.values || [],
+    borderWidth: chart.type === 'line' ? 3 : 1,
+    tension: chart.type === 'line' ? 0.3 : 0,
+    fill: chart.type === 'line',
+    pointRadius: chart.type === 'line' ? 4 : 0,
+    pointHoverRadius: chart.type === 'line' ? 7 : 0,
+    backgroundColor:
+      chart.type === 'line'
+      ? 'rgba(55,138,221,0.2)'
+      : palette,
+    borderColor:
+      chart.type === 'line'
+      ? '#378add'
+      : palette
+  };
+
+  aiChart = new Chart(ctx,{
+
+    type: chart.type || 'bar',
+
+    data:{
+
+      labels: chart.labels,
+
+      datasets:[dataset]
+    },
+
+    options:{
+
+      responsive:true,
+
+      maintainAspectRatio:false,
+
+      plugins:{
+
+        legend:{
+
+          display: chart.type !== 'bar',
+
+          labels:{
+
+            font:{
+              size:12
+            }
+          }
+        }
+      },
+
+      scales: chart.type === 'doughnut' ? {} : {
+
+        x:{
+
+          ticks:{
+
+            color:getTickColor()
+          }
+        },
+
+        y:{
+
+          beginAtZero:true,
+
+          ticks:{
+
+            color:getTickColor()
+          }
+        }
+      }
+    }
+  });
+}
+
+
+// =====================================================
+// ENTER KEY
+// =====================================================
+
+document
+.getElementById('singleInput')
+.addEventListener('keydown',e=>{
+
+    if(e.key==='Enter'){
+
+        runSingle();
+    }
+});
+
+  // =====================================================
+  // STATIC DASHBOARD VISUALS
+  // =====================================================
+
+  function initOverviewCharts(){
+
+    if(typeof Chart === 'undefined'){
+
+      return;
+    }
+
+    const typeCtx = document.getElementById('chartType');
+
+    if(typeCtx){
+
+      new Chart(typeCtx,{
+
+        type:'doughnut',
+
+        data:{
+
+          labels:['Regulation','Legislation','Policy','Guidelines','Lainnya'],
+
+          datasets:[{
+
+            data:[45,30,10,8,7],
+
+            backgroundColor:['#378add','#639922','#ba7517','#993556','#888780'],
+
+            borderWidth:1
+          }]
+        },
+
+        options:{
+
+          responsive:true,
+
+          maintainAspectRatio:false,
+
+          plugins:{
+
+            legend:{
+
+              position:'bottom',
+
+              labels:{
+
+                font:{
+                  size:11
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const countryCtx = document.getElementById('chartCountry');
+
+    if(countryCtx){
+
+      new Chart(countryCtx,{
+
+        type:'bar',
+
+        data:{
+
+          labels:['India','USA','EU','China','Brazil','Germany','France','Australia','Canada','UK'],
+
+          datasets:[{
+
+            label:'Jumlah Dokumen',
+
+            data:[5200,4800,4500,4300,3900,3600,3400,3200,3000,2900],
+
+            backgroundColor:'#378add'
+          }]
+        },
+
+        options:{
+
+          responsive:true,
+
+          maintainAspectRatio:false,
+
+          plugins:{
+
+            legend:{
+              display:false
+            }
+          },
+
+          scales:{
+
+            x:{
+
+              ticks:{
+
+                color:getTickColor()
+              }
+            },
+
+            y:{
+
+              beginAtZero:true,
+
+              ticks:{
+
+                color:getTickColor()
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function initModelCharts(){
+
+    if(typeof Chart === 'undefined'){
+
+      return;
+    }
+
+    const classAcc = document.getElementById('classAccBars');
+
+    if(classAcc){
+
+      const classes = [
+        { name:'Regulation', value:84 },
+        { name:'Legislation', value:79 },
+        { name:'Policy', value:71 },
+        { name:'Guidelines', value:68 },
+        { name:'Other', value:62 }
+      ];
+
+      classAcc.innerHTML = '';
+
+      classes.forEach((c) => {
+
+        const row = document.createElement('div');
+
+        row.style.marginBottom = '10px';
+
+        row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#4b5563;margin-bottom:4px">
+          <span>${c.name}</span>
+          <span>${c.value}%</span>
+        </div>
+        <div class="acc-bar-wrap"><div class="acc-bar" style="width:${c.value}%"></div></div>
+        `;
+
+        classAcc.appendChild(row);
+      });
+    }
+
+    const cmCtx = document.getElementById('chartCM');
+
+    if(cmCtx){
+
+      new Chart(cmCtx,{
+
+        type:'bar',
+
+        data:{
+
+          labels:['Regulation','Legislation','Policy','Guidelines','Other'],
+
+          datasets:[
+            {
+              label:'Precision',
+              data:[0.86,0.81,0.72,0.69,0.64],
+              backgroundColor:'#378add'
+            },
+            {
+              label:'Recall',
+              data:[0.82,0.77,0.70,0.66,0.60],
+              backgroundColor:'#639922'
+            }
+          ]
+        },
+
+        options:{
+
+          responsive:true,
+
+          maintainAspectRatio:false,
+
+          plugins:{
+
+            legend:{
+
+              position:'bottom',
+
+              labels:{
+
+                font:{
+                  size:11
+                }
+              }
+            }
+          },
+
+          scales:{
+
+            x:{
+
+              ticks:{
+
+                color:getTickColor()
+              }
+            },
+
+            y:{
+
+              beginAtZero:true,
+
+              ticks:{
+
+                color:getTickColor()
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function initSplitTable(){
+
+    const tbody = document.getElementById('previewTable');
+
+    if(!tbody){
+
+      return;
+    }
+
+    const rows = [
+      { id:'FAO-10293', country:'Indonesia', type:'Regulation', year:2019, split:'Train' },
+      { id:'FAO-18420', country:'Brazil', type:'Legislation', year:2017, split:'Test' },
+      { id:'FAO-22011', country:'India', type:'Policy', year:2020, split:'Train' },
+      { id:'FAO-09128', country:'USA', type:'Guidelines', year:2014, split:'Train' },
+      { id:'FAO-15502', country:'France', type:'Regulation', year:2018, split:'Test' }
+    ];
+
+    tbody.innerHTML = rows.map((r, i) => {
+
+      const badge = r.split === 'Train' ? 'badge-train' : 'badge-test';
+
+      return `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.id}</td>
+        <td>${r.country}</td>
+        <td>${r.type}</td>
+        <td>${r.year}</td>
+        <td><span class="badge ${badge}">${r.split}</span></td>
+      </tr>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    initOverviewCharts();
+
+    initModelCharts();
+
+    initSplitTable();
+  });
+
+</script>
+</body>
+</html>
